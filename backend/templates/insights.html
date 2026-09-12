@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Live feed | Sentinel{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>Live activity feed</h1>
+    <p class="text-muted">Unified timeline from your latest analysis—updates on the same cadence as the dashboard.</p>
+</div>
+<div id="insights-container" class="insights-wrap hidden">
+    <div class="card timeline-card">
+        <div class="flex-between timeline-head">
+            <h3>Timeline</h3>
+            <span class="text-muted text-sm" id="feedLastSync">—</span>
+        </div>
+        <ul id="timeline-list" class="timeline-list"></ul>
+    </div>
+    <div class="grid insights-side">
+        <div class="card">
+            <h3>Recent searches</h3>
+            <ul id="searches-list" class="tag-list"></ul>
+        </div>
+        <div class="card">
+            <h3>Topics of interest</h3>
+            <ul id="prefs-list" class="tag-list"></ul>
+        </div>
+    </div>
+</div>
+<p id="insights-loading" class="text-muted">Loading feed…</p>
+{% endblock %}

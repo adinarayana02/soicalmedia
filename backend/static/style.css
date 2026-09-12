@@ -1,0 +1,85 @@
+:root{
+  --bg:#0b0f17;
+  --card:#101828;
+  --muted:#94a3b8;
+  --txt:#e5e7eb;
+  --acc:#22d3ee;
+  --acc2:#a78bfa;
+  --danger:#fb7185;
+  --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(167,139,250,.18), transparent 60%),
+              radial-gradient(1000px 500px at 90% 20%, rgba(34,211,238,.14), transparent 55%),
+              var(--bg);
+  color:var(--txt);
+  min-height:100vh;
+}
+.wrap{display:flex; align-items:center; justify-content:center; padding:40px}
+.card{
+  width:min(920px, 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:26px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+.hdr h1{margin:0 0 10px; font-size:22px; letter-spacing:.2px}
+.sub{margin:0 0 18px; color:var(--muted); line-height:1.45}
+.form{display:flex; flex-direction:column; gap:10px}
+.lbl{font-size:13px; color:var(--muted)}
+textarea, input[type="file"]{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px 12px;
+  background: rgba(2,6,23,.35);
+  color: var(--txt);
+  outline:none;
+}
+textarea:focus, input[type="file"]:focus{border-color: rgba(34,211,238,.5)}
+.btn{
+  margin-top:6px;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid rgba(34,211,238,.35);
+  background: linear-gradient(90deg, rgba(34,211,238,.18), rgba(167,139,250,.18));
+  color: var(--txt);
+  font-weight:700;
+  cursor:pointer;
+}
+.btn:disabled{opacity:.6; cursor:not-allowed}
+.loading{
+  display:none;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  color: var(--muted);
+  background: rgba(2,6,23,.25);
+}
+.spinner{
+  width:16px; height:16px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,.2);
+  border-top-color: var(--acc);
+  animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.out{margin-top:18px}
+.out-h{font-weight:800; margin-bottom:10px}
+.json{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  background: rgba(2,6,23,.35);
+  overflow:auto;
+  max-height: 420px;
+  color:#dbeafe;
+}
+.foot{margin-top:14px; color:var(--muted); font-size:12px; line-height:1.45}

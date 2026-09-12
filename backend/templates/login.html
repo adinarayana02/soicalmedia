@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Login | Sentinel{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="card auth-card">
+        <h2>Welcome Back</h2>
+        <p class="mb-1 text-muted">Log in to your agentic dashboard.</p>
+        <form id="loginForm">
+            <label>Email</label>
+            <input type="email" id="loginEmail" required class="form-input">
+            <label>Password</label>
+            <input type="password" id="loginPassword" required class="form-input">
+            <button type="submit" class="btn primary-btn mt-2">Login</button>
+            <p id="loginError" class="error-text hidden mt-1"></p>
+        </form>
+        <p class="mt-2 text-center text-sm">Don't have an account? <a href="/signup" class="accent">Sign up here</a></p>
+    </div>
+</div>
+{% endblock %}

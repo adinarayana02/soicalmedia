@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Settings | Sentinel{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>Account &amp; preferences</h1>
+    <p class="text-muted">Privacy controls and UI thresholds. Upload history is loaded from the server.</p>
+</div>
+
+<div class="grid charts-row">
+    <div>
+        <div class="card mb-2">
+            <h3>Privacy &amp; data</h3>
+            <p class="text-muted mt-1 mb-1">Removes stored analyses, extractions, and activity linked to your account. Your login remains.</p>
+            <div class="flex-between" style="padding: 1rem; background: rgba(248, 113, 113, 0.06); border: 1px solid rgba(248, 113, 113, 0.25); border-radius: 10px;">
+                <div>
+                    <strong class="text-danger">Purge behavioral data</strong>
+                    <p class="text-sm text-muted" style="margin-top:0.35rem">Deletes insights, uploads log, messages, URLs, interactions, and profile extracts.</p>
+                </div>
+                <button type="button" class="btn ghost-btn danger-link" id="purgeDataBtn">Delete all data</button>
+            </div>
+        </div>
+
+        <div class="card mb-2">
+            <h3>Alert thresholds (local)</h3>
+            <p class="text-muted mt-1 mb-1">Saved in this browser only; use as a reminder for how strict you want future reviews.</p>
+
+            <label for="toxicityLevel" class="text-muted text-sm">Toxicity alert sensitivity</label>
+            <select id="toxicityLevel" class="form-input" style="appearance: auto; cursor: pointer;">
+                <option value="strict">Strict (&gt; 10%)</option>
+                <option value="balanced" selected>Balanced (&gt; 40%)</option>
+                <option value="lenient">Lenient (&gt; 70%)</option>
+            </select>
+
+            <div class="flex-between" style="margin-top: 1rem; align-items: center;">
+                <label for="lateNightFlag" class="text-muted text-sm">Flag late-night sessions (after 1:00)</label>
+                <input type="checkbox" id="lateNightFlag" checked style="width: 20px; height: 20px; cursor: pointer;">
+            </div>
+
+            <button type="button" class="btn primary-btn mt-2" id="savePrefsBtn">Save preferences</button>
+        </div>
+    </div>
+
+    <div>
+        <div class="card list-box">
+            <h3>Recent uploads</h3>
+            <p class="text-muted text-sm mt-1 mb-1">Last ten files recorded for your account.</p>
+            <ul id="history-list">
+                {% if history %}
+                    {% for item in history %}
+                        <li>
+                            <div class="flex-between">
+                                <strong>{{ item.file_name }}</strong>
+                                <span class="text-muted text-sm">{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </div>
+                            <div class="text-sm" style="color: var(--accent); margin-top: 0.25rem;">{{ item.upload_type | upper }}</div>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="text-center text-muted">No uploads yet.</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

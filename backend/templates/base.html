@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sentinel AI | Social Media Archive Analysis Platform{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-[#0b101e] text-slate-200 antialiased min-h-screen flex flex-col font-['Inter']">
+
+    <!-- Super Header -->
+    <div class="flex justify-between items-center px-6 py-1.5 border-b border-slate-800 bg-[#0a0f1d] z-50 relative">
+        <div class="text-[0.65rem] font-bold text-slate-500 tracking-[0.15em] uppercase">
+            SENTINEL CORE v2 &bull; SOCIAL MEDIA ARCHIVE ANALYSIS PLATFORM
+        </div>
+        <div class="flex items-center gap-4 text-xs font-semibold">
+            <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+                <span class="text-slate-300">Operational</span>
+            </div>
+            <div id="rtClock" class="font-mono text-slate-400">--:--:-- PM</div>
+        </div>
+    </div>
+    
+    <!-- Main Navbar -->
+    <nav class="flex justify-between items-center px-6 py-4 bg-[#0d1326]/90 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-40">
+        <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-12">
+            <!-- Branding -->
+            <a href="/" class="flex items-center gap-3 text-white font-bold text-xl no-underline tracking-tight">
+                <div class="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                    <i class="fa-solid fa-layer-group text-sm"></i>
+                </div>
+                Sentinel AI
+            </a>
+            
+            <!-- Links -->
+            <div class="hidden md:flex items-center gap-2">
+                <a href="/" class="text-sm font-semibold transition-all duration-200 px-4 py-2 rounded-lg {% if request.url.path == '/' %}bg-indigo-600/20 text-indigo-400 border border-indigo-500/20{% else %}text-slate-400 hover:text-white hover:bg-slate-800/50{% endif %}">Overview</a>
+                <a href="/upload" class="text-sm font-semibold transition-all duration-200 px-4 py-2 rounded-lg {% if request.url.path == '/upload' %}bg-indigo-600/20 text-indigo-400 border border-indigo-500/20{% else %}text-slate-400 hover:text-white hover:bg-slate-800/50{% endif %}">Analyze Data</a>
+                <a href="/dashboard" class="text-sm font-semibold transition-all duration-200 px-4 py-2 rounded-lg {% if request.url.path == '/dashboard' %}bg-indigo-600/20 text-indigo-400 border border-indigo-500/20{% else %}text-slate-400 hover:text-white hover:bg-slate-800/50{% endif %}">Intelligence Hub</a>
+            </div>
+        </div>
+
+        <!-- Right side user profile -->
+        <div class="flex items-center gap-6">
+            <a href="/settings" class="text-slate-400 hover:text-white text-sm font-semibold transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-gear"></i> Settings
+            </a>
+            
+            <div class="flex items-center gap-3 pl-6 border-l border-slate-700/50">
+                <div class="w-9 h-9 rounded-full bg-indigo-500 flex justify-center items-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">A</div>
+                <div class="flex flex-col">
+                    <span class="text-sm font-bold text-white leading-tight">Admin User</span>
+                    <a href="#" id="logoutBtn" class="text-[0.65rem] font-semibold text-slate-400 hover:text-white transition-colors leading-tight group flex items-center gap-1">
+                        Log out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 w-full mx-auto relative z-10">
+        <div class="fixed top-0 left-0 w-full h-full pointer-events-none z-[-1]" style="background: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 40%), radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.06), transparent 40%);"></div>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

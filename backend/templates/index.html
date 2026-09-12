@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multimodal Behavior Analysis</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <header class="hdr">
+        <h1>Agent-Based Multimodal Social Media Behavior Analysis</h1>
+        <p class="sub">Upload text, image, audio, or video. The system converts everything to unified text and runs real AI inference.</p>
+      </header>
+
+      <form id="analyzeForm" class="form">
+        <label class="lbl">Text (optional)</label>
+        <textarea name="text" id="text" placeholder="Paste a post, caption, or transcript..." rows="5"></textarea>
+
+        <label class="lbl">File (optional): image / audio / video</label>
+        <input type="file" id="file" name="file" />
+
+        <button type="submit" class="btn" id="btn">Analyze</button>
+
+        <div class="loading" id="loading" aria-live="polite">
+          <div class="spinner"></div>
+          <span>Running AI models… this can take a bit on first run.</span>
+        </div>
+      </form>
+
+      <section class="out">
+        <div class="out-h">Result</div>
+        <pre id="result" class="json">{}</pre>
+      </section>
+
+      <footer class="foot">
+        <p><strong>Privacy note:</strong> This demo processes only what you provide. No scraping. No DMs. No watch history. Not a medical diagnosis.</p>
+      </footer>
+    </section>
+  </main>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
+

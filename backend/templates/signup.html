@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Sign Up | Sentinel{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="card auth-card">
+        <h2>Create an Account</h2>
+        <p class="mb-1 text-muted">Join the behavioral intelligence platform.</p>
+        <form id="signupForm">
+            <label>Full Name</label>
+            <input type="text" id="signupName" required class="form-input">
+            <label>Email Address</label>
+            <input type="email" id="signupEmail" required class="form-input">
+            <label>Password</label>
+            <input type="password" id="signupPassword" required class="form-input">
+            <button type="submit" class="btn primary-btn mt-2">Create Account</button>
+            <p id="signupError" class="error-text hidden mt-1"></p>
+        </form>
+        <p class="mt-2 text-center text-sm">Already have an account? <a href="/login" class="accent">Log in</a></p>
+    </div>
+</div>
+{% endblock %}

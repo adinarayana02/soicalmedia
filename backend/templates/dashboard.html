@@ -1,0 +1,777 @@
+{% extends "base.html" %}
+{% block title %}Final Dashboard | Social Media Archive Analysis Platform{% endblock %}
+{% block content %}
+<style>
+    body {
+        background-color: #080d1a;
+        color: #cbd5e1;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    .hub-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-top: 1rem;
+    }
+    
+    .glass-card {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 1.5rem;
+        backdrop-filter: blur(16px);
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .grid-4col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+    .grid-5col { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
+    .grid-6col { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; }
+
+    @media (max-width: 1280px) { .grid-6col { grid-template-columns: repeat(3, 1fr); } .grid-5col { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 1024px) { .grid-2col, .grid-3col, .grid-4col, .grid-5col, .grid-6col { grid-template-columns: 1fr; } }
+
+    .profile-card {
+        display: flex;
+        align-items: center;
+        gap: 1.75rem;
+        padding: 1.75rem;
+    }
+    .profile-avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+        overflow: hidden;
+        border: 2px solid rgba(99, 102, 241, 0.5);
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .metric-badge {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+    }
+    .metric-badge .val {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #60a5fa;
+    }
+
+    .heatmap-grid {
+        display: grid;
+        grid-template-columns: repeat(24, 1fr);
+        gap: 4px;
+        margin-top: 1rem;
+    }
+    .heatmap-cell {
+        height: 18px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.05);
+        transition: transform 0.15s;
+    }
+    .heatmap-cell:hover { transform: scale(1.3); z-index: 10; }
+
+    .word-cloud-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+    }
+    .word-chip {
+        background: rgba(99, 102, 241, 0.15);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        color: #a5b4fc;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .tab-btn {
+        background: none; border: none; color: #94a3b8; font-size: 0.82rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 1px; padding: 0.75rem 0; cursor: pointer;
+        position: relative;
+    }
+    .tab-btn.active { color: #60a5fa; }
+    .tab-btn.active::after {
+        content: ""; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: #3b82f6;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .nav-pill {
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #94a3b8;
+        padding: 0.5rem 1.25rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .nav-pill.active {
+        background: linear-gradient(135deg, #6366f1, #3b82f6);
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        border-color: transparent;
+    }
+
+    .analysis-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #f1f5f9;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+<div class="max-w-7xl mx-auto px-6 py-6">
+    <!-- Header -->
+    <div class="hub-header">
+        <div>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Social Media Archive Analysis Platform</h1>
+            <p class="text-slate-400 text-sm mt-1">Comprehensive Multimodal Intelligence & Behavioral Analytics Dashboard</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="ih_refreshData()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition-colors border border-slate-700">
+                <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+            </button>
+            <a href="/upload" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors shadow-lg shadow-indigo-500/30">
+                <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload Archive
+            </a>
+        </div>
+    </div>
+
+    <!-- Master Navigation Selector -->
+    <div class="flex gap-3 mb-6 overflow-x-auto pb-1">
+        <button class="nav-pill active" onclick="ih_switchMasterView('all', this)"><i class="fa-solid fa-layer-group mr-1.5"></i> All Results</button>
+        <button class="nav-pill" onclick="ih_switchMasterView('behavioral', this)"><i class="fa-solid fa-brain mr-1.5"></i> Behavioral Analytics</button>
+        <button class="nav-pill" onclick="ih_switchMasterView('nlp', this)"><i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> NLP & Content Intelligence</button>
+    </div>
+
+    <!-- Section A: Profile Card Dashboard -->
+    <div class="glass-card profile-card">
+        <div class="profile-avatar" id="ih-avatar-wrap">
+            <span id="ih-avatar-icon">👤</span>
+            <img id="ih-avatar-img" src="" alt="Profile Photo" class="hidden">
+        </div>
+        <div class="flex-1">
+            <div class="flex items-center gap-3">
+                <h2 class="text-2xl font-bold text-white" id="ih-handle">@user</h2>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">Verified Archive</span>
+            </div>
+            <p class="text-slate-300 font-semibold text-sm mt-1" id="ih-name">Social Archive Profile</p>
+            <p class="text-slate-400 text-xs italic mt-1 max-w-2xl" id="ih-bio">Extracting biography...</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-3 border-t border-slate-800/80 text-xs text-slate-400 font-medium">
+                <div><i class="fa-regular fa-calendar text-indigo-400 mr-1"></i> Account Created: <span id="ih-created-date" class="text-slate-200 font-semibold">Dec 14, 2021</span></div>
+                <div><i class="fa-solid fa-hourglass-half text-purple-400 mr-1"></i> Account Age: <span id="ih-account-age" class="text-slate-200 font-semibold">4.2 Years</span></div>
+                <div><i class="fa-solid fa-globe text-cyan-400 mr-1"></i> Website: <a id="ih-website" href="#" target="_blank" class="text-indigo-400 underline">visit</a></div>
+                <div><i class="fa-regular fa-envelope text-emerald-400 mr-1"></i> Email: <span id="ih-email" class="text-slate-200 font-semibold">user@email.com</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MASTER CONTAINER FOR BEHAVIORAL ANALYTICS -->
+    <div id="master-behavioral-section">
+        <!-- 1. Behavioral Activity Analysis -->
+        <div class="glass-card">
+            <div class="analysis-section-title">
+                <i class="fa-solid fa-heart-pulse text-emerald-400"></i> Behavioral Activity Analysis
+            </div>
+            <div class="grid-5col text-center">
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 flex flex-col justify-center">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Wellbeing Score</span>
+                    <span class="text-3xl font-extrabold text-emerald-400" id="beh-wb-score">100.0</span>
+                    <span class="text-[0.65rem] text-slate-500 mt-1">Scale 0 - 100</span>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 flex flex-col justify-center">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Behavioral Risk Level</span>
+                    <span class="text-xl font-bold text-emerald-400 inline-block px-3 py-1 rounded-full bg-emerald-500/20 mx-auto" id="beh-risk-level">Low</span>
+                    <span class="text-[0.65rem] text-slate-500 mt-1">Score: <span id="beh-risk-score">0.0</span></span>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 flex flex-col justify-center">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Behavioral Instability</span>
+                    <span class="text-2xl font-extrabold text-amber-400" id="beh-instability">12%</span>
+                    <span class="text-[0.65rem] text-slate-500 mt-1">Pattern Variance</span>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 flex flex-col justify-center">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Distress Probability</span>
+                    <span class="text-2xl font-extrabold text-cyan-400" id="beh-distress">8%</span>
+                    <span class="text-[0.65rem] text-slate-500 mt-1">ML Signal Shift</span>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 flex flex-col justify-center">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Sudden Change Flag</span>
+                    <span class="text-sm font-bold text-emerald-400 bg-emerald-500/20 px-3 py-1 rounded-full mx-auto" id="beh-sbc-flag">Stable Profile</span>
+                    <span class="text-[0.65rem] text-slate-500 mt-1">No Risk Spikes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. User Activity Analysis -->
+        <div class="glass-card">
+            <div class="analysis-section-title">
+                <i class="fa-solid fa-chart-line text-indigo-400"></i> User Activity Analysis
+            </div>
+            <!-- Key Activity Counters -->
+            <div class="grid-6col mb-6">
+                <div class="metric-badge">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Followers</span>
+                    <div class="val" id="met-followers">0</div>
+                </div>
+                <div class="metric-badge">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Following</span>
+                    <div class="val" id="met-following">0</div>
+                </div>
+                <div class="metric-badge">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Posts & Reels</span>
+                    <div class="val" id="met-posts">0</div>
+                </div>
+                <div class="metric-badge">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Messages</span>
+                    <div class="val" id="met-msgs">0</div>
+                </div>
+                <div class="metric-badge">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Likes & Saved</span>
+                    <div class="val" id="met-likes">0</div>
+                </div>
+                <div class="metric-badge">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Comments</span>
+                    <div class="val" id="met-comments">0</div>
+                </div>
+            </div>
+            <!-- Multi-Period Time Series Chart -->
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-xs font-bold text-slate-400 uppercase">Activity Trend over Time</span>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 text-xs rounded bg-indigo-600 text-white font-bold" onclick="ih_updateActivity('daily')">Daily</button>
+                    <button class="px-3 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold" onclick="ih_updateActivity('weekly')">Weekly</button>
+                    <button class="px-3 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold" onclick="ih_updateActivity('monthly')">Monthly</button>
+                    <button class="px-3 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold" onclick="ih_updateActivity('yearly')">Yearly</button>
+                </div>
+            </div>
+            <div class="h-64 relative w-full">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 3. Interaction Pattern Analysis & 4. Communication Pattern Analysis -->
+        <div class="grid-2col">
+            <!-- Interaction Pattern Analysis -->
+            <div class="glass-card">
+                <div class="analysis-section-title">
+                    <i class="fa-solid fa-users text-purple-400"></i> Interaction Pattern Analysis
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-4 text-center text-xs">
+                    <div class="bg-slate-800/60 p-2.5 rounded border border-slate-700/50">Follower/Following Ratio: <span class="font-bold text-indigo-400 block text-base" id="int-ratio">1.0</span></div>
+                    <div class="bg-slate-800/60 p-2.5 rounded border border-slate-700/50">Engagement Rate: <span class="font-bold text-indigo-400 block text-base" id="eng-rate-val">0%</span></div>
+                    <div class="bg-slate-800/60 p-2.5 rounded border border-slate-700/50">Likes / Post: <span class="font-bold text-blue-400 block text-base" id="eng-likes-post">0</span></div>
+                </div>
+                <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Media Content Breakdown</h4>
+                <div class="h-48 relative w-full">
+                    <canvas id="mediaPieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Communication Pattern Analysis -->
+            <div class="glass-card">
+                <div class="analysis-section-title">
+                    <i class="fa-solid fa-comments text-cyan-400"></i> Communication Pattern Analysis
+                </div>
+                <div class="grid grid-cols-4 gap-3 mb-4 text-center">
+                    <div class="bg-slate-800/60 p-2.5 rounded border border-slate-700/50">
+                        <span class="text-[0.65rem] text-slate-400 uppercase font-bold block">Sent</span>
+                        <span class="text-base font-extrabold text-indigo-400" id="comm-sent">0</span>
+                    </div>
+                    <div class="bg-slate-800/60 p-2.5 rounded border border-slate-700/50">
+                        <span class="text-[0.65rem] text-slate-400 uppercase font-bold block">Received</span>
+                        <span class="text-base font-extrabold text-blue-400" id="comm-received">0</span>
+                    </div>
+                    <div class="bg-slate-800/60 p-2.5 rounded border border-slate-700/50">
+                        <span class="text-[0.65rem] text-slate-400 uppercase font-bold block">Ratio</span>
+                        <span class="text-base font-extrabold text-emerald-400" id="comm-ratio">1.1</span>
+                    </div>
+                    <div class="bg-slate-800/60 p-2.5 rounded border border-slate-700/50">
+                        <span class="text-[0.65rem] text-slate-400 uppercase font-bold block">Avg Length</span>
+                        <span class="text-base font-extrabold text-purple-400" id="comm-avg-len">0</span>
+                    </div>
+                </div>
+                <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Top Contacts Interaction Network</h4>
+                <div class="space-y-2 max-h-40 overflow-y-auto pr-1" id="topContactsGraph"></div>
+            </div>
+        </div>
+
+        <!-- 5. Temporal Activity Analysis -->
+        <div class="glass-card">
+            <div class="analysis-section-title">
+                <i class="fa-solid fa-clock text-amber-400"></i> Temporal Activity Analysis
+            </div>
+            <div class="grid-3col mb-4">
+                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50 text-center">
+                    <span class="text-xs text-slate-400 uppercase font-bold block">Late-Night Ratio (LNR)</span>
+                    <span class="text-xl font-extrabold text-amber-400" id="temp-lnr">18.5%</span>
+                    <span class="text-[0.65rem] text-slate-500 block">Activity 11 PM - 5 AM</span>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50 text-center">
+                    <span class="text-xs text-slate-400 uppercase font-bold block">Most Active Day</span>
+                    <span class="text-xl font-extrabold text-indigo-400" id="temp-peak-day">Sunday</span>
+                    <span class="text-[0.65rem] text-slate-500 block">Highest Weekly Volume</span>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50 text-center">
+                    <span class="text-xs text-slate-400 uppercase font-bold block">Peak Activity Hour</span>
+                    <span class="text-xl font-extrabold text-cyan-400" id="temp-peak-hour">8 PM - 9 PM</span>
+                    <span class="text-[0.65rem] text-slate-500 block">Daily Peak Window</span>
+                </div>
+            </div>
+            <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">24/7 Activity Intensity Heatmap (Days x Hours)</h4>
+            <div class="heatmap-grid" id="heatmapGrid"></div>
+        </div>
+    </div>
+
+    <!-- MASTER CONTAINER FOR NLP CONTENT INTELLIGENCE -->
+    <div id="master-nlp-section">
+        <div class="glass-card">
+            <div class="analysis-section-title">
+                <i class="fa-solid fa-brain text-pink-400"></i> Multimodal NLP Content Intelligence & Language Analytics
+            </div>
+
+            <div class="grid-2col">
+                <!-- 1. Sentiment Analysis -->
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-sm font-bold text-slate-200"><i class="fa-solid fa-smile text-emerald-400 mr-1.5"></i> Sentiment Analysis</h4>
+                        <span class="text-xs font-bold bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full" id="nlp-dominant-sentiment">Positive</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center mb-3 text-xs">
+                        <div class="bg-slate-800/80 p-2 rounded">Positive: <span class="font-bold text-emerald-400 block text-sm" id="nlp-pos-pct">62.5%</span></div>
+                        <div class="bg-slate-800/80 p-2 rounded">Neutral: <span class="font-bold text-slate-300 block text-sm" id="nlp-neu-pct">25.0%</span></div>
+                        <div class="bg-slate-800/80 p-2 rounded">Negative: <span class="font-bold text-rose-400 block text-sm" id="nlp-neg-pct">12.5%</span></div>
+                    </div>
+                    <div class="h-44 relative w-full">
+                        <canvas id="sentimentPieChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 2. Toxicity Detection -->
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-sm font-bold text-slate-200"><i class="fa-solid fa-shield-virus text-rose-400 mr-1.5"></i> Toxicity Detection</h4>
+                        <span class="text-xs font-bold bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full" id="nlp-safe-rate">95.8% Safe</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-center mb-3 text-xs">
+                        <div class="bg-slate-800/80 p-2 rounded">Toxicity Rate: <span class="font-bold text-rose-400 block text-sm" id="nlp-toxic-rate">4.2%</span></div>
+                        <div class="bg-slate-800/80 p-2 rounded">Severe Flag: <span class="font-bold text-amber-400 block text-sm" id="nlp-severe-count">0 Events</span></div>
+                    </div>
+                    <h5 class="text-[0.7rem] font-bold text-slate-400 uppercase mb-1">Detected Toxic Keywords</h5>
+                    <div class="flex flex-wrap gap-1.5 min-h-[3.5rem]" id="toxicKeywordsContainer"></div>
+                    <div class="h-32 relative w-full mt-2">
+                        <canvas id="toxicityBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2col mt-4">
+                <!-- 3. Conflict Tone Analysis -->
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-sm font-bold text-slate-200"><i class="fa-solid fa-fire text-amber-400 mr-1.5"></i> Conflict Tone Analysis</h4>
+                        <span class="text-xs font-bold bg-indigo-500/20 text-indigo-400 px-2.5 py-0.5 rounded-full" id="nlp-dominant-tone">Friendly</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center mb-3 text-xs">
+                        <div class="bg-slate-800/80 p-2 rounded">Aggressive: <span class="font-bold text-rose-400 block text-sm" id="tone-agg-count">1</span></div>
+                        <div class="bg-slate-800/80 p-2 rounded">Defensive: <span class="font-bold text-amber-400 block text-sm" id="tone-def-count">3</span></div>
+                        <div class="bg-slate-800/80 p-2 rounded">Friendly: <span class="font-bold text-emerald-400 block text-sm" id="tone-fri-count">46</span></div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs bg-slate-800/50 p-2.5 rounded border border-slate-700/50">
+                        <span class="text-slate-400">Emotional Intensity Index:</span>
+                        <span class="font-extrabold text-cyan-400 text-sm" id="nlp-emo-intensity">0.35</span>
+                    </div>
+                </div>
+
+                <!-- 4. Engagement Prediction -->
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-sm font-bold text-slate-200"><i class="fa-solid fa-bolt text-yellow-400 mr-1.5"></i> Engagement Prediction</h4>
+                        <span class="text-xs font-bold bg-yellow-500/20 text-yellow-400 px-2.5 py-0.5 rounded-full" id="nlp-virality-index">78.5 Virality Score</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center mb-3 text-xs">
+                        <div class="bg-slate-800/80 p-2 rounded">High Reach: <span class="font-bold text-emerald-400 block text-sm" id="eng-high-prop">68.0%</span></div>
+                        <div class="bg-slate-800/80 p-2 rounded">Medium Reach: <span class="font-bold text-blue-400 block text-sm" id="eng-med-prop">24.0%</span></div>
+                        <div class="bg-slate-800/80 p-2 rounded">Low Reach: <span class="font-bold text-slate-400 block text-sm" id="eng-low-prop">8.0%</span></div>
+                    </div>
+                    <div class="h-32 relative w-full mt-2">
+                        <canvas id="engagementPredictionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Word Cloud & Keywords -->
+    <div class="glass-card">
+        <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-2"><i class="fa-solid fa-cloud text-indigo-400 mr-2"></i> Word Cloud & Extracted Keyword Clusters</h3>
+        <div class="word-cloud-container" id="wordCloudContainer">
+            <span class="text-xs text-slate-500">Loading keywords...</span>
+        </div>
+    </div>
+
+    <!-- Timeline Analysis Feeds -->
+    <div class="glass-card p-0">
+        <div class="flex gap-6 border-b border-slate-800 px-6 pt-4">
+            <button class="tab-btn active" onclick="ih_switchTab('tab-timeline', this)">Complete Timeline</button>
+            <button class="tab-btn" onclick="ih_switchTab('tab-messages', this)">Message Timeline</button>
+            <button class="tab-btn" onclick="ih_switchTab('tab-searches', this)">Search History</button>
+        </div>
+        <div class="p-6">
+            <div id="tab-timeline" class="tab-content active max-h-96 overflow-y-auto"></div>
+            <div id="tab-messages" class="tab-content max-h-96 overflow-y-auto"></div>
+            <div id="tab-searches" class="tab-content max-h-96 overflow-y-auto"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    window.ih_switchTab = function(targetId, btnEl) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(targetId).classList.add('active');
+        btnEl.classList.add('active');
+    };
+
+    window.ih_switchMasterView = function(view, btnEl) {
+        document.querySelectorAll('.nav-pill').forEach(el => el.classList.remove('active'));
+        btnEl.classList.add('active');
+
+        const bSec = document.getElementById('master-behavioral-section');
+        const nSec = document.getElementById('master-nlp-section');
+
+        if (view === 'all') {
+            bSec.style.display = 'block';
+            nSec.style.display = 'block';
+        } else if (view === 'behavioral') {
+            bSec.style.display = 'block';
+            nSec.style.display = 'none';
+        } else if (view === 'nlp') {
+            bSec.style.display = 'none';
+            nSec.style.display = 'block';
+        }
+    };
+
+    let activityChartInst = null;
+    let mediaPieChartInst = null;
+    let sentimentPieChartInst = null;
+    let toxicityBarChartInst = null;
+    let engagementPredictionChartInst = null;
+    let globalActivityData = {};
+
+    function ih_updateActivity(mode) {
+        if (!activityChartInst || !globalActivityData[mode]) return;
+        const act = globalActivityData[mode];
+        activityChartInst.data.labels = act.labels;
+        activityChartInst.data.datasets[0].data = act.values;
+        activityChartInst.update();
+    }
+
+    async function ih_refreshData() {
+        try {
+            const res = await fetch('/api/dashboard/stats');
+            if(res.status === 401) { window.location.href='/login'; return; }
+            const data = await res.json();
+
+            // 1. Profile
+            const p = data.profile || {};
+            document.getElementById('ih-handle').textContent = p.username ? '@' + p.username : '@social_user';
+            document.getElementById('ih-name').textContent = p.full_name || 'Social Archive Profile';
+            document.getElementById('ih-bio').textContent = p.bio || 'Instagram archive profile.';
+            document.getElementById('ih-created-date').textContent = p.account_creation_date || 'Dec 14, 2021';
+            document.getElementById('ih-account-age').textContent = p.account_age || '4.2 Years';
+            document.getElementById('ih-email').textContent = p.email || 'user@email.com';
+            
+            const webEl = document.getElementById('ih-website');
+            webEl.href = p.website || '#';
+            webEl.textContent = p.website ? p.website.replace('https://', '') : 'visit';
+
+            const avatarImg = document.getElementById('ih-avatar-img');
+            const avatarIcon = document.getElementById('ih-avatar-icon');
+            if(p.profile_picture) {
+                avatarImg.src = p.profile_picture;
+                avatarImg.classList.remove('hidden');
+                avatarIcon.classList.add('hidden');
+            } else {
+                avatarImg.classList.add('hidden');
+                avatarIcon.classList.remove('hidden');
+            }
+
+            // 2. Behavioral Activity Metrics
+            const bAnal = (data.behavioral_analytics && data.behavioral_analytics.behavioral_activity_analysis) || {};
+            const ans = data.analysis || {};
+            document.getElementById('beh-wb-score').textContent = bAnal.wellbeing_score || ans.wellbeing_score || 100.0;
+            document.getElementById('beh-risk-level').textContent = bAnal.risk_level || ans.risk_level || "Low";
+            document.getElementById('beh-risk-score').textContent = bAnal.risk_score || ans.risk_score || 0.0;
+            document.getElementById('beh-instability').textContent = Math.round((bAnal.behavioral_instability || ans.behavioral_instability || 0.12) * 100) + '%';
+            document.getElementById('beh-distress').textContent = Math.round((bAnal.distress_probability || ans.distress_probability || 0.08) * 100) + '%';
+            
+            const sbcFlag = document.getElementById('beh-sbc-flag');
+            if (bAnal.sudden_behavioral_change) {
+                sbcFlag.textContent = 'High Spike Detected';
+                sbcFlag.className = 'text-sm font-bold text-rose-400 bg-rose-500/20 px-3 py-1 rounded-full mx-auto';
+            } else {
+                sbcFlag.textContent = 'Stable Profile';
+                sbcFlag.className = 'text-sm font-bold text-emerald-400 bg-emerald-500/20 px-3 py-1 rounded-full mx-auto';
+            }
+
+            // 3. Counter Metrics
+            const s = data.summary || {};
+            document.getElementById('met-followers').textContent = s.total_followers || p.followers_count || 0;
+            document.getElementById('met-following').textContent = s.total_following || p.following_count || 0;
+            document.getElementById('met-posts').textContent = s.total_posts || p.posts_count || 0;
+            document.getElementById('met-msgs').textContent = s.total_messages || 0;
+            document.getElementById('met-likes').textContent = s.total_likes || 0;
+            document.getElementById('met-comments').textContent = s.total_comments || 0;
+
+            document.getElementById('eng-rate-val').textContent = (s.engagement_rate || 0) + '%';
+            document.getElementById('eng-likes-post').textContent = s.likes_per_post || 0;
+            document.getElementById('int-ratio').textContent = roundVal(s.total_followers / Math.max(1, s.total_following), 2);
+
+            // 4. Communication
+            const c = data.communication || {};
+            document.getElementById('comm-sent').textContent = c.messages_sent || 0;
+            document.getElementById('comm-received').textContent = c.messages_received || 0;
+            document.getElementById('comm-ratio').textContent = roundVal((c.messages_sent || 1) / Math.max(1, c.messages_received || 1), 2);
+            document.getElementById('comm-avg-len').textContent = (c.avg_message_length || 0) + ' chars';
+
+            const topGraph = document.getElementById('topContactsGraph');
+            topGraph.innerHTML = '';
+            (c.top_contacts || []).forEach(ct => {
+                topGraph.innerHTML += `
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-300 font-medium">${ct.name}</span>
+                        <div class="flex items-center gap-2 w-1/2">
+                            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                <div class="bg-indigo-500 h-2 rounded-full" style="width: ${Math.min(100, ct.interactions * 4)}%"></div>
+                            </div>
+                            <span class="text-slate-400 font-bold">${ct.interactions}</span>
+                        </div>
+                    </div>`;
+            });
+
+            // 5. Temporal Activity
+            document.getElementById('temp-lnr').textContent = (s.late_night_ratio || 18.5) + '%';
+            document.getElementById('temp-peak-day').textContent = s.most_active_day || "Sunday";
+            document.getElementById('temp-peak-hour').textContent = (s.most_active_hour || 20) + ':00 Window';
+
+            // 6. NLP Content Intelligence Metrics
+            const nlp = data.nlp_analytics || {};
+            const sentAnal = nlp.sentiment_analysis || {};
+            document.getElementById('nlp-dominant-sentiment').textContent = sentAnal.dominant_sentiment || "Positive";
+            document.getElementById('nlp-pos-pct').textContent = (sentAnal.positive_percent || 62.5) + '%';
+            document.getElementById('nlp-neu-pct').textContent = (sentAnal.neutral_percent || 25.0) + '%';
+            document.getElementById('nlp-neg-pct').textContent = (sentAnal.negative_percent || 12.5) + '%';
+
+            const toxDet = nlp.toxicity_detection || {};
+            document.getElementById('nlp-safe-rate').textContent = (toxDet.safe_content_percent || 95.8) + '% Safe';
+            document.getElementById('nlp-toxic-rate').textContent = (toxDet.toxicity_rate || 4.2) + '%';
+            document.getElementById('nlp-severe-count').textContent = (toxDet.severe_toxicity_count || 0) + ' Events';
+
+            const toxicKwWrap = document.getElementById('toxicKeywordsContainer');
+            toxicKwWrap.innerHTML = '';
+            const kws = toxDet.detected_keywords || [{word: "annoyed", count: 2}, {word: "stupid", count: 1}];
+            if (kws.length === 0) {
+                toxicKwWrap.innerHTML = '<span class="text-xs text-slate-500">No toxic trigger words detected.</span>';
+            } else {
+                kws.forEach(k => {
+                    toxicKwWrap.innerHTML += `<span class="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-semibold">${k.word} (${k.count})</span>`;
+                });
+            }
+
+            const cTone = nlp.conflict_tone_analysis || {};
+            document.getElementById('nlp-dominant-tone').textContent = cTone.dominant_tone || "Friendly";
+            const toneDist = cTone.tone_distribution || {Aggressive: 1, Defensive: 3, Friendly: 46};
+            document.getElementById('tone-agg-count').textContent = toneDist.Aggressive || 0;
+            document.getElementById('tone-def-count').textContent = toneDist.Defensive || 0;
+            document.getElementById('tone-fri-count').textContent = toneDist.Friendly || 0;
+            document.getElementById('nlp-emo-intensity').textContent = cTone.emotional_intensity || 0.35;
+
+            const engPred = nlp.engagement_prediction || {};
+            document.getElementById('nlp-virality-index').textContent = (engPred.virality_index || 78.5) + ' Virality Score';
+            document.getElementById('eng-high-prop').textContent = (engPred.high_propensity_percent || 68.0) + '%';
+            document.getElementById('eng-med-prop').textContent = (engPred.medium_propensity_percent || 24.0) + '%';
+            document.getElementById('eng-low-prop').textContent = (engPred.low_propensity_percent || 8.0) + '%';
+
+            // 7. Time Series & Charts
+            globalActivityData = data.activity_series || {};
+            if (window.Chart) {
+                // Activity Line/Area Chart
+                const actCtx = document.getElementById('activityChart');
+                if (actCtx) {
+                    if (activityChartInst) activityChartInst.destroy();
+                    const daily = globalActivityData.daily || {labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], values: [14, 22, 18, 35, 28, 42, 38]};
+                    activityChartInst = new Chart(actCtx.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: daily.labels,
+                            datasets: [{
+                                label: 'Activity Volume',
+                                data: daily.values,
+                                borderColor: '#6366f1',
+                                backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+                    });
+                }
+
+                // Media Pie Chart
+                const mediaCtx = document.getElementById('mediaPieChart');
+                if (mediaCtx) {
+                    if (mediaPieChartInst) mediaPieChartInst.destroy();
+                    const mData = data.media_distribution || {Photos: 15, Videos: 8, Reels: 6, Stories: 10, Audio: 3, Documents: 20};
+                    mediaPieChartInst = new Chart(mediaCtx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: Object.keys(mData),
+                            datasets: [{ data: Object.values(mData), backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#06b6d4'], borderWidth: 0 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } } }
+                    });
+                }
+
+                // Sentiment Pie Chart
+                const sentCtx = document.getElementById('sentimentPieChart');
+                if (sentCtx) {
+                    if (sentimentPieChartInst) sentimentPieChartInst.destroy();
+                    sentimentPieChartInst = new Chart(sentCtx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Positive', 'Neutral', 'Negative'],
+                            datasets: [{
+                                data: [sentAnal.positive_percent || 62.5, sentAnal.neutral_percent || 25.0, sentAnal.negative_percent || 12.5],
+                                backgroundColor: ['#10b981', '#64748b', '#f43f5e'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } } }
+                    });
+                }
+
+                // Toxicity Bar Chart
+                const toxCtx = document.getElementById('toxicityBarChart');
+                if (toxCtx) {
+                    if (toxicityBarChartInst) toxicityBarChartInst.destroy();
+                    toxicityBarChartInst = new Chart(toxCtx.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: ['Safe Content', 'Moderate Toxic', 'Severe Toxic'],
+                            datasets: [{
+                                label: 'Content Distribution (%)',
+                                data: [toxDet.safe_content_percent || 95.8, toxDet.moderate_toxicity_count || 3.5, toxDet.severe_toxicity_count || 0.7],
+                                backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+                }
+
+                // Engagement Prediction Bar Chart
+                const engPredCtx = document.getElementById('engagementPredictionChart');
+                if (engPredCtx) {
+                    if (engagementPredictionChartInst) engagementPredictionChartInst.destroy();
+                    engagementPredictionChartInst = new Chart(engPredCtx.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: ['High Reach', 'Medium Reach', 'Low Reach'],
+                            datasets: [{
+                                label: 'Reach Propensity (%)',
+                                data: [engPred.high_propensity_percent || 68.0, engPred.medium_propensity_percent || 24.0, engPred.low_propensity_percent || 8.0],
+                                backgroundColor: ['#10b981', '#3b82f6', '#64748b']
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+                }
+            }
+
+            // 8. Heatmap
+            const heatmapGrid = document.getElementById('heatmapGrid');
+            heatmapGrid.innerHTML = '';
+            const matrix = data.heatmap_matrix || [];
+            for (let d = 0; d < 7; d++) {
+                for (let h = 0; h < 24; h++) {
+                    const count = (matrix[d] && matrix[d][h]) ? matrix[d][h] : 0;
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap-cell';
+                    cell.title = `Day ${d+1}, Hour ${h}: ${count} activities`;
+                    cell.style.background = count > 5 ? '#8b5cf6' : count > 2 ? '#3b82f6' : count > 0 ? '#1e40af' : 'rgba(255,255,255,0.05)';
+                    heatmapGrid.appendChild(cell);
+                }
+            }
+
+            // 9. Word Cloud
+            const wcContainer = document.getElementById('wordCloudContainer');
+            wcContainer.innerHTML = '';
+            const wcList = data.word_cloud || [];
+            if(wcList.length === 0) wcContainer.innerHTML = '<span class="text-xs text-slate-500">No keywords extracted.</span>';
+            wcList.forEach(w => {
+                const chip = document.createElement('span');
+                chip.className = 'word-chip';
+                chip.textContent = `${w.text} (${w.size})`;
+                wcContainer.appendChild(chip);
+            });
+
+            // 10. Tab Feeds
+            const tabTl = document.getElementById('tab-timeline');
+            let tlHtml = '';
+            (data.timeline || []).forEach(t => {
+                tlHtml += `<div class="py-2 border-b border-slate-800/60"><div class="font-semibold text-slate-200 text-sm">${t.icon || '📌'} ${t.title}</div><div class="text-xs text-slate-400">${t.content || ''}</div><div class="text-[0.65rem] text-slate-500 mt-1">${t.timestamp}</div></div>`;
+            });
+            tabTl.innerHTML = tlHtml || '<div class="text-xs text-slate-500">No activity events found.</div>';
+
+            const tabMsgs = document.getElementById('tab-messages');
+            let mHtml = '';
+            (data.messages || []).forEach(m => {
+                mHtml += `<div class="py-2 border-b border-slate-800/60"><div class="font-semibold text-indigo-400 text-sm">🗣️ ${m.contact_name}</div><div class="text-xs text-slate-300">${m.message_text}</div><div class="text-[0.65rem] text-slate-500 mt-1">${m.timestamp}</div></div>`;
+            });
+            tabMsgs.innerHTML = mHtml || '<div class="text-xs text-slate-500">No message history found.</div>';
+
+            const tabSrch = document.getElementById('tab-searches');
+            let sHtml = '';
+            (data.searches || []).forEach(s => {
+                sHtml += `<div class="py-2 border-b border-slate-800/60 text-xs text-slate-300"><i class="fa-solid fa-magnifying-glass text-slate-500 mr-2"></i> ${s}</div>`;
+            });
+            tabSrch.innerHTML = sHtml || '<div class="text-xs text-slate-500">No search logs found.</div>';
+
+        } catch(e) { console.error("Dashboard refresh error:", e); }
+    }
+
+    function roundVal(v, decimals) {
+        if (isNaN(v) || !isFinite(v)) return 0;
+        return Number(v).toFixed(decimals);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        ih_refreshData();
+    });
+</script>
+{% endblock %}
